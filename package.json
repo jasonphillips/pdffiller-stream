@@ -1,5 +1,4 @@
 {
-
   "name": "pdffiller-stream",
   "repository": {
     "type": "git",
@@ -20,7 +19,7 @@
     "pdf"
   ],
   "dependencies": {
-    "lodash": "^4.17.4"    
+    "lodash": "^4.17.9"
   },
   "author": {
     "name": "original: John Taylor and David Baldwynn; stream fork: Jason Phillips"
@@ -28,7 +27,7 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "mocha": "^3.2.0",
-    "should": "^11.1.2"
+    "mocha": "^8.0.1",
+    "should": "^13.2.3"
   }
 }
