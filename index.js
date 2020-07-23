@@ -39,9 +39,10 @@ var pdffiller = {
     },
 
     generateFieldJson: function (sourceFile, nameRegex) {
-        var regName = /FieldName: ([^\n]*)/,
-            regType = /FieldType: ([A-Za-z\t .]+)/,
-            regFlags = /FieldFlags: ([0-9\t .]+)/,
+        var regName = /^FieldName: /,
+            regType = /^FieldType: /,
+            regFlags = /^FieldFlags: /,
+            regValue = /^FieldValue: /,
             fieldArray = [],
             currField = {};
 
@@ -61,28 +62,27 @@ var pdffiller = {
             });
 
             childProcess.stdout.on('end', function () {
-                
-                fields = output.split("---").slice(1);
-
-                fields.forEach(function (field) {
-                    currField = {};
-                    currField['title'] = field.match(regName)[1].trim() || '';
-
-                    if (field.match(regType)) {
-                        currField['fieldType'] = field.match(regType)[1].trim() || '';
-                    } else {
-                        currField['fieldType'] = '';
+                var fields = output.split('\n').slice(1);
+                fields.forEach(function (line) {
+                    if (line.match(regName)) {
+                        currField.title = line.substr(line.indexOf(' ') + 1).trim() || '';
+                    } else if (line.match(regType)) {
+                        currField.fieldType = line.substr(line.indexOf(' ') + 1).trim() || '';
+                    } else if (line.match(regFlags)) {
+                        currField.fieldFlags = line.substr(line.indexOf(' ') + 1).trim() || '';
+                    } else if (line.match(regValue)) {
+                        currField.fieldValue = line.substr(line.indexOf(' ') + 1).trim() || '';
+                    } else if (line === '---') {
+                        currField.fieldValue = currField.fieldValue || '';
+                        fieldArray.push(currField);
+                        currField = {};
                     }
-
-                    if (field.match(regFlags)) {
-                        currField['fieldFlags'] = field.match(regFlags)[1].trim() || '';
-                    } else {
-                        currField['fieldFlags'] = '';
-                    }
-
-                    currField['fieldValue'] = '';
-                    fieldArray.push(currField);
                 });
+
+                if (Object.keys(currField).length) {
+                    currField.fieldValue = currField.fieldValue || '';
+                    fieldArray.push(currField);
+                }
 
                 resolve(fieldArray);
             });
